@@ -1,12 +1,14 @@
 import UserMixin from "./utils/user-mixin";
 import { setRememberCookie, getRememberCookie } from "./services/cookie";
-import { login, loginBasic, requestBearer } from "./services/login";
+import { logIn, loginBasic, requestBearer } from "./services/login";
+import { useLogin } from "./hooks/useLogin";
 
 export {
   UserMixin,
   setRememberCookie,
   getRememberCookie,
-  login,
+  logIn,
   loginBasic,
   requestBearer,
+  useLogin,
 };
