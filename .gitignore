@@ -8,8 +8,9 @@
 # testing
 /coverage
 
-# production
+# builds
 /build
+/lib
 
 #generated css & js
 /public/css/
