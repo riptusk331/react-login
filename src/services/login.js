@@ -1,8 +1,36 @@
 import { verify } from "jsonwebtoken";
 
 import { setRememberCookie } from "./cookie";
+import UserMixin from "../utils/user-mixin";
 
-const login = (type, authObj) => {
+/**
+ * Redux compatible login.
+ *
+ * This function accepts a username & password and performs Basic HTTP authentication
+ * to the backend. It expects a token
+ * Log a user in to the backend via basic auth, and store the auth token in the redux
+ * store. Accepts a callback
+ *
+ * @param {string} user the username to log in to the backend with
+ * @param {string} pw the password to log in to the backend with
+ * @param {function} callback the redux callback function to execute after successful login
+ */
+const logIn = (user, pw, callback) => {
+  return async (dispatch) => {
+    const token = await _backendLogin("Basic", { user: user, pw: pw });
+    if (token) {
+      const user = new UserMixin(token);
+      dispatch(callback(user, user.token));
+    }
+  };
+};
+
+/**
+ *
+ * @param {*} type
+ * @param {*} authObj
+ */
+const _backendLogin = (type, authObj) => {
   switch (type) {
     case "Basic":
       return loginBasic(authObj.user, authObj.pw);
@@ -11,6 +39,20 @@ const login = (type, authObj) => {
   }
 };
 
+/**
+ * Perform Basic HTTP authentication to the backend endpoint supplied in the
+ * REACT_APP_TOKEN_ENDPOINT environment variable.
+ *
+ * Encodes the user & pw parameters to a base-64 Authorization header and requests
+ * authentiation to the server.
+ *
+ * Expects a JSON Web Token in the response. This JWT is verified, and if valid, used
+ * to generate a "remember me" cookie and then returned
+ *
+ * @param {string} user
+ * @param {string} pw
+ * @returns {object} response object containing auth token
+ */
 const loginBasic = async (user, pw) => {
   const loginBase = btoa(`${user}:${pw}`);
   const requestOpts = {
@@ -32,11 +74,12 @@ const loginBasic = async (user, pw) => {
   }
 };
 
-const requestBearer = async (jwt, endpoint) => {
+const requestBearer = async (jwt, endpoint, reqType="GET") => {
   const requestOpts = {
-    method: "GET",
+    method: reqType,
     headers: {
       Authorization: `Bearer ${jwt}`,
+      "X-Csrf-Token": "ryan"
     },
   };
   const resp = await fetch(endpoint, requestOpts);
@@ -58,4 +101,4 @@ const verifyJWT = (token) => {
   });
 };
 
-export { login, loginBasic, requestBearer };
+export { logIn, loginBasic, requestBearer };
