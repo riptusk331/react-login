@@ -16,6 +16,11 @@ import { timingSafeStrEquals } from "../utils/util";
 
 const cookies = new Cookies();
 
+const setRefreshToken = (token) => {
+  localStorage.setItem('rl-refresh-token', token)
+}
+
+
 const setRememberCookie = (payload) => {
   cookies.set(
     REMEMBER_COOKIE_NAME,
@@ -33,9 +38,9 @@ const getRememberCookie = () => {
   return cookie ? _decodeRememberCookie(cookie) : null;
 };
 
-const setSessionCookie = (jwt) => {
+const setSessionCookie = (jwt, length=null) => {
   cookies.set(JWT_COOKIE_NAME, jwt, {
-    maxAge: JWT_COOKIE_LENGTH,
+    maxAge: length || JWT_COOKIE_LENGTH,
     sameSite: JWT_COOKIE_SAMESITE,
   });
 };
