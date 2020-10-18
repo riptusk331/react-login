@@ -1,6 +1,6 @@
 import { verify } from "jsonwebtoken";
 
-import { setRememberCookie } from "./cookie";
+import { setRememberCookie, setSessionCookie } from "./cookie";
 import UserMixin from "../utils/user-mixin";
 
 /**
@@ -63,6 +63,10 @@ const loginBasic = async (user, pw) => {
   };
   const resp = await fetch(process.env.REACT_APP_TOKEN_ENDPOINT, requestOpts);
   const respJson = await resp.json();
+  if (respJson) {
+    setAuthTokens(respJson)
+    return respJson
+  }
   try {
     const verified = await verifyJWT(respJson.token);
     if (verified) {
