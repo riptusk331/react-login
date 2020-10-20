@@ -82,8 +82,7 @@ const requestBearer = async (jwt, endpoint, reqType="GET") => {
   const requestOpts = {
     method: reqType,
     headers: {
-      Authorization: `Bearer ${jwt}`,
-      "X-Csrf-Token": "ryan"
+      Authorization: `Bearer ${jwt}`
     },
   };
   const resp = await fetch(endpoint, requestOpts);
