@@ -1,10 +1,39 @@
-import { useState } from "react";
+import { useContext } from "react";
+import { LoginContext } from "./provider";
 
 const useLogin = () => {
-  const [user, setUser] = useState("");
-  const [pw, setPw] = useState("");
+  const [state, dispatch] = useContext(LoginContext);
 
-  return { user: user, pw: pw, setUser: setUser, setPw: setPw };
+  const setUser = (user) => {
+    const newState = { ...state };
+    newState.user = user;
+    dispatch(newState);
+  };
+
+  const setPw = (password) => {
+    const newState = { ...state };
+    newState.password = password;
+    dispatch(newState);
+  };
+
+  const setRemember = (val) => {
+    const newState = { ...state };
+    newState.rememberMe = val;
+    dispatch(newState);
+  };
+
+  const login = () => {
+    {
+    }
+  };
+
+  return {
+    ...state,
+    setUser,
+    setPw,
+    setRemember,
+    login,
+  };
 };
 
 export { useLogin };
