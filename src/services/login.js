@@ -1,10 +1,4 @@
-import { verify } from "jsonwebtoken";
-
-import { setRememberCookie, setSessionCookie } from "./cookie";
-import UserMixin from "../utils/user-mixin";
-
 /**
- * Redux compatible login.
  *
  * This function accepts a username & password and performs Basic HTTP authentication
  * to the backend. It expects a token
@@ -13,16 +7,11 @@ import UserMixin from "../utils/user-mixin";
  *
  * @param {string} user the username to log in to the backend with
  * @param {string} pw the password to log in to the backend with
- * @param {function} callback the redux callback function to execute after successful login
+ * @param {function} callback an optional callback function to execute after successful login
  */
-const logIn = (user, pw, callback) => {
-  return async (dispatch) => {
-    const token = await _backendLogin("Basic", { user: user, pw: pw });
-    if (token) {
-      const user = new UserMixin(token);
-      dispatch(callback(user, user.token));
-    }
-  };
+const requestToken = async (user, pw) => {
+  const token = await _backendLogin("Basic", { user: user, pw: pw });
+  return token;
 };
 
 /**
@@ -33,9 +22,9 @@ const logIn = (user, pw, callback) => {
 const _backendLogin = (type, authObj) => {
   switch (type) {
     case "Basic":
-      return loginBasic(authObj.user, authObj.pw);
+      return httpAuthBasic(authObj.user, authObj.pw);
     case "Bearer":
-      return requestBearer(authObj);
+      return httpAuthBearer(authObj);
   }
 };
 
@@ -53,7 +42,7 @@ const _backendLogin = (type, authObj) => {
  * @param {string} pw
  * @returns {object} response object containing auth token
  */
-const loginBasic = async (user, pw) => {
+const httpAuthBasic = async (user, pw) => {
   const loginBase = btoa(`${user}:${pw}`);
   const requestOpts = {
     method: "POST",
@@ -63,45 +52,18 @@ const loginBasic = async (user, pw) => {
   };
   const resp = await fetch(process.env.REACT_APP_TOKEN_ENDPOINT, requestOpts);
   const respJson = await resp.json();
-  if (respJson) {
-    setAuthTokens(respJson)
-    return respJson
-  }
-  try {
-    const verified = await verifyJWT(respJson.token);
-    if (verified) {
-      setRememberCookie(verified[process.env.REACT_APP_USER_DESCRIPTOR]);
-      return respJson;
-    }
-  } catch (err) {
-    console.log(err);
-  }
+  return respJson;
 };
 
-const requestBearer = async (jwt, endpoint, reqType="GET") => {
+const httpAuthBearer = async (jwt, endpoint, reqType = "GET") => {
   const requestOpts = {
     method: reqType,
     headers: {
-      Authorization: `Bearer ${jwt}`
+      Authorization: `Bearer ${jwt}`,
     },
   };
   const resp = await fetch(endpoint, requestOpts);
   return await resp.json();
 };
 
-const verifyJWT = (token) => {
-  return new Promise((resolve, error) => {
-    try {
-      const jwtArr = token.split(".");
-      var algHeader = JSON.parse(atob(jwtArr[0]));
-      const decoded = verify(token, process.env.REACT_APP_SECRET_KEY, {
-        algorithms: algHeader.alg,
-      });
-      resolve(decoded);
-    } catch (err) {
-      error(err);
-    }
-  });
-};
-
-export { logIn, loginBasic, requestBearer };
+export { requestToken, httpAuthBasic, httpAuthBearer };
