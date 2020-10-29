@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { LoginContext } from "./provider";
+import { requestToken } from "../services/login";
 
 const useLogin = () => {
   const [state, dispatch] = useContext(LoginContext);
@@ -22,9 +23,18 @@ const useLogin = () => {
     dispatch(newState);
   };
 
-  const login = () => {
-    {
+  const logIn = async () => {
+    const token = await requestToken(state.user, state.pw);
+    const newState = { ...state };
+    console.log(token)
+    if (token?.access_token) {
+      newState.accessToken = token.access_token;
+      newState.accessExpires = Date.now() + token.expiration * 1000;
+      newState.authenticated = true;
+    } else {
+      newState.attempts += 1;
     }
+    dispatch(newState);
   };
 
   return {
@@ -32,7 +42,7 @@ const useLogin = () => {
     setUser,
     setPw,
     setRemember,
-    login,
+    logIn,
   };
 };
 
