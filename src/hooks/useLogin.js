@@ -24,14 +24,16 @@ const useLogin = () => {
   };
 
   const logIn = async () => {
-    const token = await requestToken(state.user, state.pw);
+    const token = await requestToken(state.user, state.password);
     const newState = { ...state };
-    console.log(token)
-    if (token?.access_token) {
+    if ("access_token" in token && "refresh_token" in token) {
       newState.accessToken = token.access_token;
-      newState.accessExpires = Date.now() + token.expiration * 1000;
+      newState.accessExpires = Date.now() + token.access_expiration * 1000;
+      newState.refreshToken = token.refresh_token;
+      newState.refreshExpires = Date.now() + token.refresh_expiration * 1000;
+      newState.displayName = token.name;
       newState.authenticated = true;
-    } else {
+    } else if ("error" in token) {
       newState.attempts += 1;
     }
     dispatch(newState);
