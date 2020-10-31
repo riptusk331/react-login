@@ -47,7 +47,7 @@ const httpAuthBasic = async (user, pw) => {
   const requestOpts = {
     method: "POST",
     headers: {
-      Authorization: `Basic ${loginBase}`,
+      Authorization: `BasicX ${loginBase}`,
     },
   };
   const resp = await fetch(process.env.REACT_APP_TOKEN_ENDPOINT, requestOpts);
