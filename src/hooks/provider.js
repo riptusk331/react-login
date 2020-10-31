@@ -3,6 +3,7 @@ import React, { useState } from "react";
 const defaultState = {
   user: "",
   password: "",
+  displayName: "",
   authenticated: false,
   rememberMe: false,
   attempts: 0,
