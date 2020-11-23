@@ -14,6 +14,11 @@ const requestToken = async (user, pw) => {
   return token;
 };
 
+const refreshToken = async (token) => {
+  const newToken = await _backendLogin("Refresh", token);
+  return newToken
+}
+
 /**
  *
  * @param {*} type
@@ -23,8 +28,8 @@ const _backendLogin = (type, authObj) => {
   switch (type) {
     case "Basic":
       return httpAuthBasic(authObj.user, authObj.pw);
-    case "Bearer":
-      return httpAuthBearer(authObj);
+    case "Refresh":
+      return httpAuthRefresh(authObj)
   }
 };
 
@@ -47,7 +52,7 @@ const httpAuthBasic = async (user, pw) => {
   const requestOpts = {
     method: "POST",
     headers: {
-      Authorization: `BasicX ${loginBase}`,
+      Authorization: `Login ${loginBase}`,
     },
   };
   const resp = await fetch(process.env.REACT_APP_TOKEN_ENDPOINT, requestOpts);
@@ -66,4 +71,15 @@ const httpAuthBearer = async (jwt, endpoint, reqType = "GET") => {
   return await resp.json();
 };
 
-export { requestToken, httpAuthBasic, httpAuthBearer };
+const httpAuthRefresh = async (jwt, reqType = "POST") => {
+  const requestOpts = {
+    method: reqType,
+    headers: {
+      Authorization: `Refresh ${jwt}`,
+    },
+  };
+  const resp = await fetch(process.env.REACT_APP_REFRESH_ENDPOINT, requestOpts);
+  return await resp.json();
+};
+
+export { requestToken, refreshToken, httpAuthBasic, httpAuthBearer };
