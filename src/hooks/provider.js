@@ -1,6 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { refreshToken } from "../services/login";
+import { setLocalStorage, parseTokenToState } from "../utils/util";
 
-const defaultState = {
+const LoginContext = React.createContext();
+
+const initialState = {
   user: "",
   password: "",
   displayName: "",
@@ -13,13 +17,34 @@ const defaultState = {
   refreshExpires: null,
 };
 
-const LoginContext = React.createContext();
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "LOGIN":
+  }
+};
 
 const LoginProvider = ({ children }) => {
-  const [state, dispatch] = useState({ ...defaultState });
+  const [state, dispatch] = useState({ ...initialState });
 
+  useEffect(() => {
+    let refresh = localStorage.getItem("rl-refresh");
+    if (refresh) {
+      refresh = JSON.parse(refresh);
+      if (Date.now() < refresh.expires) {
+        const fetchToken = async () => {
+          const yourToken = await refreshToken(refresh.token);
+          const newState = parseTokenToState(state, yourToken);
+          newState.authenticated = true;
+          setLocalStorage(newState);
+          dispatch(newState);
+          console.log(state);
+        };
+        fetchToken();
+      }
+    }
+  }, []);
   return (
-    <LoginContext.Provider value={[state, dispatch]}>{children}</LoginContext.Provider>
+    <LoginContext.Provider value={{ state, dispatch }}>{children}</LoginContext.Provider>
   );
 };
 
