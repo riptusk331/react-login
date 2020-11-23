@@ -6,4 +6,22 @@ function timingSafeStrEquals(a, b) {
   return diff === 0;
 }
 
-export { timingSafeStrEquals };
+const parseTokenToState = (state, token) => {
+  const newState = { ...state }
+  newState.accessToken = token.access_token;
+  newState.accessExpires = Date.now() + token.access_expiration * 1000;
+  newState.refreshToken = token.refresh_token;
+  newState.refreshExpires = Date.now() + token.refresh_expiration * 1000;
+  newState.displayName = token.name;
+  return newState;
+};
+
+const setLocalStorage = (state) => {
+  console.log(`setting local storage with this: ${state.refreshExpires} ${state.refreshToken}`)
+  localStorage.setItem(
+    "rl-refresh",
+    JSON.stringify({ token: state.refreshToken, expires: state.refreshExpires })
+  );
+};
+
+export { timingSafeStrEquals, parseTokenToState, setLocalStorage };
