@@ -1,9 +1,10 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { LoginContext } from "./provider";
 import { requestToken } from "../services/login";
+import { parseTokenToState, setLocalStorage } from "../utils/util";
 
 const useLogin = () => {
-  const [state, dispatch] = useContext(LoginContext);
+  const {state, dispatch} = useContext(LoginContext);
 
   const setUser = (user) => {
     const newState = { ...state };
@@ -25,14 +26,11 @@ const useLogin = () => {
 
   const logIn = async () => {
     const token = await requestToken(state.user, state.password);
-    const newState = { ...state };
+    let newState = { ...state };
     if ("access_token" in token && "refresh_token" in token) {
-      newState.accessToken = token.access_token;
-      newState.accessExpires = Date.now() + token.access_expiration * 1000;
-      newState.refreshToken = token.refresh_token;
-      newState.refreshExpires = Date.now() + token.refresh_expiration * 1000;
-      newState.displayName = token.name;
+      newState = parseTokenToState(newState, token);
       newState.authenticated = true;
+      setLocalStorage(newState);
     } else if ("error" in token) {
       newState.attempts += 1;
     }
