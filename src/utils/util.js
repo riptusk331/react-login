@@ -7,17 +7,17 @@ function timingSafeStrEquals(a, b) {
 }
 
 const parseTokenToState = (state, token) => {
-  const newState = { ...state }
+  const newState = { ...state };
   newState.accessToken = token.access_token;
   newState.accessExpires = Date.now() + token.access_expiration * 1000;
   newState.refreshToken = token.refresh_token;
   newState.refreshExpires = Date.now() + token.refresh_expiration * 1000;
   newState.displayName = token.name;
+  newState.authenticated = true;
   return newState;
 };
 
 const setLocalStorage = (state) => {
-  console.log(`setting local storage with this: ${state.refreshExpires} ${state.refreshToken}`)
   localStorage.setItem(
     "rl-refresh",
     JSON.stringify({ token: state.refreshToken, expires: state.refreshExpires })
