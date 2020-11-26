@@ -17,12 +17,6 @@ const initialState = {
   refreshExpires: null,
 };
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case "LOGIN":
-  }
-};
-
 const LoginProvider = ({ children }) => {
   const [state, dispatch] = useState({ ...initialState });
 
@@ -33,11 +27,14 @@ const LoginProvider = ({ children }) => {
       if (Date.now() < refresh.expires) {
         const fetchToken = async () => {
           const yourToken = await refreshToken(refresh.token);
-          const newState = parseTokenToState(state, yourToken);
-          newState.authenticated = true;
-          setLocalStorage(newState);
-          dispatch(newState);
-          console.log(state);
+          if ("error" in yourToken) {
+            console.log("invalid token used from storage");
+            localStorage.removeItem('rl-refresh')
+          } else {
+            const newState = parseTokenToState(state, yourToken);
+            setLocalStorage(newState);
+            dispatch(newState);
+          }
         };
         fetchToken();
       }
